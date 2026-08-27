@@ -1,0 +1,95 @@
+-- 1. Carga de Kavo UI Library
+local Library = loadstring(game:HttpGet("https://githubusercontent.com"))()
+
+-- 2. Creación de la Ventana Principal
+local Window = Library.CreateLib("Kings on Top", "DarkTheme")
+
+-- 3. Pestaña Principal y Sección
+local MainTab = Window:NewTab("Main Features")
+local MainSection = MainTab:NewSection("Automation")
+
+-- Variables de Estado
+local AutoTrain = false
+local AutoStrength = false
+local AutoAttack = false
+local AutoPets = false
+local AutoRebirth = false
+
+-- Auto Entrenar
+MainSection:NewToggle("Auto Train / Strength", "Entrenamiento Automático", function(state)
+    AutoTrain = state
+    if AutoTrain then
+        spawn(function()
+            while AutoTrain do
+                local args = { "Train" }
+                game:GetService("ReplicatedStorage").Events.TrainEvent:FireServer(unpack(args))
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+-- Auto Atacar
+MainSection:NewToggle("Auto Attack", "Ataque Automático", function(state)
+    AutoAttack = state
+    if AutoAttack then
+        spawn(function()
+            while AutoAttack do
+                local args = { "Attack" }
+                game:GetService("ReplicatedStorage").Events.AttackEvent:FireServer(unpack(args))
+                task.wait(0.2)
+            end
+        end)
+    end
+end)
+
+-- Auto Abrir Mascotas
+MainSection:NewToggle("Auto Open Pets", "Abre huevos automáticamente", function(state)
+    AutoPets = state
+    if AutoPets then
+        spawn(function()
+            while AutoPets do
+                local args = { "OpenEgg", "BasicEgg" }
+                game:GetService("ReplicatedStorage").Events.PetEvent:FireServer(unpack(args))
+                task.wait(0.5)
+            end
+        end)
+    end
+end)
+
+-- Auto Renacer (Rebirth)
+MainSection:NewToggle("Auto Rebirth", "Renace automáticamente", function(state)
+    AutoRebirth = state
+    if AutoRebirth then
+        spawn(function()
+            while AutoRebirth do
+                game:GetService("ReplicatedStorage").Events.RebirthEvent:FireServer()
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
+-- 4. Pestaña de Teleports
+local TeleportTab = Window:NewTab("Teleports")
+local TeleSection = TeleportTab:NewSection("Zones")
+
+local zones = {
+    ["Zone 1"] = Vector3.new(100, 0, 100),
+    ["Zone 2"] = Vector3.new(500, 0, 500),
+    ["Zone 3"] = Vector3.new(1000, 0, 1000)
+}
+
+for zoneName, coords in pairs(zones) do
+    TeleSection:NewButton(zoneName, "Teletransporte a " .. zoneName, function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(coords)
+    end)
+end
+
+-- 5. Pestaña de Monedas / Gemas (Visual Only)
+local MiscTab = Window:NewTab("Miscellaneous")
+local MiscSection = MiscTab:NewSection("Stats")
+
+MiscSection:NewButton("Infinite Gems (Visual)", "Gemas visuales en tu pantalla", function()
+    game.Players.LocalPlayer.leaderstats.Gems.Value = 999999999
+end)
