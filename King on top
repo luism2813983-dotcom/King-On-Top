@@ -1,0 +1,29 @@
+-- 1. Carga la librería visual de Rayfield
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu'))()
+
+-- 2. Crea la ventana principal de tu aplicación
+local Window = Rayfield:CreateWindow({
+   Name = "Mi Primer Script Hub",
+   LoadingTitle = "Cargando Interfaz...",
+   LoadingSubtitle = "Por David",
+   ConfigurationSaving = { Enabled = false }
+})
+
+-- 3. Crea una pestaña para tus trucos
+local Tab = Window:CreateTab("Modificaciones", 4483345998)
+
+-- 4. Botón para cambiar la velocidad
+Tab:CreateButton({
+   Name = "Velocidad Extrema (x100)",
+   Callback = function()
+       game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
+   end,
+})
+
+-- 5. Botón para saltar muy alto
+Tab:CreateButton({
+   Name = "Súper Salto",
+   Callback = function()
+       game.Players.LocalPlayer.Character.Humanoid.JumpPower = 150
+   end,
+})
