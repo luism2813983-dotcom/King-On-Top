@@ -146,14 +146,24 @@ PetTab:CreateToggle({
         AutoCrystal = Value
 
         task.spawn(function()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local Event = ReplicatedStorage.rEvents.openCrystalRemote
+
             while AutoCrystal do
-                local Event = game:GetService("ReplicatedStorage").rEvents.openCrystalRemote
-                Event:InvokeServer(
-                    "openCrystalBatch",
-                    "Insufficient Masters Crystal",
-                    10
-                )
-                task.wait(0.1)
+                local success, err = pcall(function()
+                    Event:InvokeServer(
+                        "openCrystalBatch",
+                        "Insufficient Masters Crystal",
+                        10
+                    )
+                end)
+
+                if not success then
+                    warn("Error al abrir cristal:", err)
+                    break
+                end
+
+                task.wait(0.5)
             end
         end)
     end,
