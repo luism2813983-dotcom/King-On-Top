@@ -41,6 +41,7 @@ local MainSection = MainTab:CreateSection("Auto Farm")
 
 local AutoWeight = false
 local AutoRebirth = false
+local AutoRebirth1000 = false
 
 -- Option 1: AUTO WEIGHT
 MainTab:CreateToggle({
@@ -64,17 +65,17 @@ MainTab:CreateToggle({
                             character.Humanoid:EquipTool(weightTool)
                         end
                         
-                        -- 1. Simular la activación/clic del tool en el personaje
+                        -- Simular la activación/clic del tool en el personaje
                         weightTool:Activate()
                     end
                     
-                    -- 2. Por si el juego requiere disparar su evento específico
+                    -- Por si el juego requiere disparar su evento específico
                     local muscleEvent = player:FindFirstChild("muscleEvent")
                     if muscleEvent then
                         muscleEvent:FireServer("rep")
                     end
                 end
-                task.wait(0.05) -- Intervalo rápido para que haga las reps rápido
+                task.wait(0.05)
             end
         end)
     end,
@@ -103,6 +104,56 @@ MainTab:CreateToggle({
                     end
                 end
                 task.wait(0.5)
+            end
+        end)
+    end,
+}) 
+
+-- Option 3: AUTO RENACIMIENTO x1000
+MainTab:CreateToggle({
+    Name = "⚡ Auto Renacimiento x1000",
+    CurrentValue = false,
+    Flag = "AutoRebirth1000",
+
+    Callback = function(Value)
+        AutoRebirth1000 = Value
+
+        task.spawn(function()
+            while AutoRebirth1000 do
+                local Event = game:GetService("ReplicatedStorage").rEvents.rebirthRemote
+                Event:InvokeServer(
+                    "massRebirthRequest",
+                    1000
+                )
+                task.wait(0.5)
+            end
+        end)
+    end,
+})
+
+-- Pestaña Pet
+local PetTab = Window:CreateTab("🐶 Pet", nil)
+local PetSection = PetTab:CreateSection("Crystals & Pets")
+
+local AutoCrystal = false
+
+PetTab:CreateToggle({
+    Name = "💎 Auto Cristal",
+    CurrentValue = false,
+    Flag = "AutoCrystal",
+
+    Callback = function(Value)
+        AutoCrystal = Value
+
+        task.spawn(function()
+            while AutoCrystal do
+                local Event = game:GetService("ReplicatedStorage").rEvents.openCrystalRemote
+                Event:InvokeServer(
+                    "openCrystalBatch",
+                    "Insufficient Masters Crystal",
+                    10
+                )
+                task.wait(0.1)
             end
         end)
     end,
