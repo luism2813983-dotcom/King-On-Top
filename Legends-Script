@@ -1,14 +1,14 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "LEGENDS SCRIPT",
+   Name = "Músculos Del vacío x Mía kalifa",
    Icon = 0,
    LoadingTitle = "LEGENDS",
    LoadingSubtitle = "by 1_F0",
    ConfigurationSaving = {
       Enabled = true,
       FolderName = nil,
-      FileName = "LEGENDS SCRIPT"
+      FileName = "Músculos Del vacío x Mía kalifa"
    },
    Discord = {
       Enabled = true,
