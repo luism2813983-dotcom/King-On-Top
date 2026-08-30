@@ -55,7 +55,7 @@ task.spawn(function()
 end)
 
 -- /////////////////////////////////////////////////
--- 🔧 SISTEMA ANTI LAG (UN SOLO BOTÓN)
+-- 🔧 SISTEMA ANTI LAG
 -- /////////////////////////////////////////////////
 local AntiLagEnabled = false
 
@@ -65,7 +65,6 @@ local function ApplyAntiLag()
     local Players = game:GetService("Players")
     local LocalPlayer = Players.LocalPlayer
 
-    -- 🧹 Limpiar restos
     pcall(function()
         task.spawn(function()
             while AntiLagEnabled do
@@ -79,7 +78,6 @@ local function ApplyAntiLag()
         end)
     end)
 
-    -- ✨ Desactivar partículas
     pcall(function()
         for _, v in pairs(Workspace:GetDescendants()) do
             if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("SmokeEmitter") or v:IsA("Fire") or v:IsA("Sparkles") then
@@ -98,7 +96,6 @@ local function ApplyAntiLag()
         end)
     end)
 
-    -- 🌑 Sombras y luces
     pcall(function()
         Lighting.GlobalShadows = false
         Lighting.FogEnd = 100000
@@ -107,7 +104,6 @@ local function ApplyAntiLag()
         Lighting.EnvironmentDiffuseScale = 0
     end)
 
-    -- 🎨 Calidad gráfica
     pcall(function()
         for _, v in pairs(Workspace:GetDescendants()) do
             if v:IsA("BasePart") then
@@ -118,7 +114,6 @@ local function ApplyAntiLag()
         end
     end)
 
-    -- 🖼️ Renderizado
     pcall(function()
         LocalPlayer:SetAttribute("QualityLevel", 1)
         settings().Rendering.QualityLevel = Enum.QualityLevel.Level1
@@ -139,12 +134,56 @@ local function DisableAntiLag()
 end
 
 -- /////////////////////////////////////////////////
--- 🏃 SISTEMA DE VELOCIDAD 300
+-- 🎰 AUTO SPIN FORTUNE — SOLO TOGGLE + GIRO RÁPIDO
 -- /////////////////////////////////////////////////
-local Speed300 = false
-local OriginalSpeed = 16
+local AutoSpinFortune = false
 
--- Pestaña Main
+local function SpinFortuneWheel()
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+    if not rEvents or not rEvents:FindFirstChild("openFortuneWheelRemote") then return end
+
+    local Remote = rEvents.openFortuneWheelRemote
+    local Chances = ReplicatedStorage:FindFirstChild("fortuneWheelChances")
+    if not Chances or not Chances:FindFirstChild("Fortune Wheel") then return end
+
+    pcall(function()
+        if Remote:IsA("RemoteFunction") then
+            Remote:InvokeServer("openFortuneWheel", Chances["Fortune Wheel"])
+        else
+            Remote:FireServer("openFortuneWheel", Chances["Fortune Wheel"])
+        end
+    end)
+end
+
+-- 🎰 PESTAÑA RULETA — SOLO INTERRUPTOR
+local FortuneTab = Window:CreateTab("🎰 Ruleta", nil)
+FortuneTab:CreateSection("Auto Spin Rápido")
+
+FortuneTab:CreateToggle({
+    Name = "🔁 Auto Spin Ruleta",
+    CurrentValue = false,
+    Flag = "AutoSpinFortune",
+    Callback = function(Value)
+        AutoSpinFortune = Value
+        if AutoSpinFortune then
+            Rayfield:Notify({Title = "🎡 Auto Spin ACTIVADO", Content = "Girando a máxima velocidad ⚡", Duration = 2.5})
+            task.spawn(function()
+                while AutoSpinFortune do
+                    SpinFortuneWheel()
+                    task.wait(0.05) -- Lo más rápido posible sin sobrecargar
+                end
+            end)
+        else
+            Rayfield:Notify({Title = "🛑 Auto Spin DESACTIVADO", Content = "Ruleta detenida", Duration = 2.5})
+        end
+    end,
+})
+
+-- /////////////////////////////////////////////////
+-- RESTO DE FUNCIONES (sin cambios)
+-- /////////////////////////////////////////////////
+
 local MainTab = Window:CreateTab("🏠 Main", nil)
 MainTab:CreateSection("Auto Farm")
 
@@ -155,7 +194,6 @@ local AutoHandstand = false
 local AutoRebirth = false
 local AutoRebirthMax = false
 
--- AUTO WEIGHT
 MainTab:CreateToggle({
     Name = "🏋️ AUTO WEIGHT",
     CurrentValue = false,
@@ -181,7 +219,6 @@ MainTab:CreateToggle({
     end,
 })
 
--- AUTO PUSHUP
 MainTab:CreateToggle({
     Name = "🤸 Auto Pushup",
     CurrentValue = false,
@@ -207,7 +244,6 @@ MainTab:CreateToggle({
     end,
 })
 
--- AUTO ABDOMINALES
 MainTab:CreateToggle({
     Name = "🧘 Auto Abdominales",
     CurrentValue = false,
@@ -233,7 +269,6 @@ MainTab:CreateToggle({
     end,
 })
 
--- AUTO PARADA DE MANOS
 MainTab:CreateToggle({
     Name = "🤸‍♂️ Auto Parada De Manos",
     CurrentValue = false,
@@ -259,7 +294,6 @@ MainTab:CreateToggle({
     end,
 })
 
--- AUTO REBIRTH
 MainTab:CreateToggle({
     Name = "🔄 AUTO REBIRTH",
     CurrentValue = false,
@@ -284,7 +318,6 @@ MainTab:CreateToggle({
     end,
 })
 
--- AUTO RENACIMIENTO MAXIMO
 MainTab:CreateToggle({
     Name = "⚡ AUTO RENACIMIENTO MAXIMO",
     CurrentValue = false,
@@ -308,7 +341,6 @@ MainTab:CreateToggle({
     end,
 })
 
--- 🐾 Pestaña Pets
 local PetsTab = Window:CreateTab("🐾 Pets", nil)
 PetsTab:CreateSection("EGG FARM")
 
@@ -339,7 +371,6 @@ PetsTab:CreateToggle({
     end,
 })
 
--- ✨ AUTO CRYSTAL 1Qi — CORREGIDO (Funciona desde cualquier lugar)
 local AutoCrystal1Qi = false
 
 PetsTab:CreateToggle({
@@ -368,11 +399,12 @@ PetsTab:CreateToggle({
     end,
 })
 
--- ⚙️ Pestaña Misc
 local MiscTab = Window:CreateTab("⚙️ Misc", nil)
 MiscTab:CreateSection("🏃 VELOCIDAD & MOVIMIENTO")
 
--- 🏃 SPEED 300
+local Speed300 = false
+local OriginalSpeed = 16
+
 MiscTab:CreateToggle({
     Name = "🏃 VELOCIDAD 300",
     CurrentValue = false,
@@ -396,7 +428,6 @@ MiscTab:CreateToggle({
     end,
 })
 
--- Mantener velocidad al respawnear
 game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function(character)
     task.wait(0.1)
     if Speed300 and character:FindFirstChildOfClass("Humanoid") then
@@ -406,7 +437,6 @@ end)
 
 MiscTab:CreateSection("🚀 OPTIMIZACIÓN")
 
--- 🔧 ANTI LAG — UN SOLO BOTÓN
 MiscTab:CreateToggle({
     Name = "🚀 ANTI LAG COMPLETO",
     CurrentValue = false,
@@ -425,7 +455,6 @@ MiscTab:CreateToggle({
 
 MiscTab:CreateSection("Utilidades")
 
--- 🛡️ ANTI AFK
 local AntiAfk = false
 local AntiAfkConnection
 
@@ -463,7 +492,6 @@ MiscTab:CreateToggle({
     end,
 })
 
--- 📍 LOCK POSITION
 local LockPosition = false
 local SavedPosition = nil
 local Players = game:GetService("Players")
