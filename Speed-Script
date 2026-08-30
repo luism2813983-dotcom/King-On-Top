@@ -1,5 +1,7 @@
+-- CARGA RAYFIELD PRIMERO, SIN NADA ANTES QUE FALLE
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+-- CREAMOS LA VENTANA LO ANTES POSIBLE
 local Window = Rayfield:CreateWindow({
    Name = "LEGENDS SCRIPT",
    Icon = 0,
@@ -8,29 +10,28 @@ local Window = Rayfield:CreateWindow({
    ConfigurationSaving = {
       Enabled = true,
       FolderName = nil,
-      FileName = "LEGENDS SCRIPT"
+      FileName = "LEGENDS_SCRIPT"
    },
    Discord = {
       Enabled = true,
       Invite = "ayt6qxRca",
       RememberJoins = true
    },
-   KeySystem = true,
-   KeySettings = {
-      Title = "Untitled",
-      Subtitle = "LEGENDS SCRIPT",
-      Note = "SCRIPT PRIVADO",
-      FileName = "Key",
-      SaveKey = true,
-      GrabKeyFromSite = true,
-      Key = {"KING"}
-   }
+   KeySystem = false,
+   KeySettings = {}
 })
 
--- /////////////////////////////////////////////////
--- PARTE DEL FONDO DE PANTALLA
--- /////////////////////////////////////////////////
+-- SERVICIOS DECLARADOS UNA SOLA VEZ AL INICIO
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+
+-- FONDO DE PANTALLA (sin errores si no encuentra el GUI)
 local function ApplyCustomBackground(targetCoreGui, imageId, transparency)
+    if not targetCoreGui then return end
     local backgroundImage = Instance.new("ImageLabel")
     backgroundImage.Name = "RayfieldCustomBackground"
     backgroundImage.Size = UDim2.new(1, 0, 1, 0)
@@ -53,30 +54,39 @@ local function ApplyCustomBackground(targetCoreGui, imageId, transparency)
 end
 
 task.spawn(function()
-    task.wait(1)
-    local coreGui = game:GetService("CoreGui")
-    for _, gui in ipairs(coreGui:GetChildren()) do
+    task.wait(1.5) -- Esperar a que Rayfield cargue
+    for _, gui in ipairs(CoreGui:GetChildren()) do
         if gui.Name == "Rayfield" or (gui:IsA("ScreenGui") and gui:FindFirstChild("Main")) then
             ApplyCustomBackground(gui, 1787967131252, 0.5)
             break
         end
     end
 end)
--- /////////////////////////////////////////////////
 
--- Pestaña Main
-local MainTab = Window:CreateTab("🏠 Main", nil)
-MainTab:CreateSection("Auto Farm")
-
+-- ESTADOS GLOBALES
 local AutoWeight = false
 local AutoPushup = false
 local AutoSitups = false
 local AutoHandstand = false
 local AutoRebirth = false
-local AutoRebirthMax = false
 local AutoPunch = false
+local SpeedEnabled = false
+local SpeedOriginal = 16
+local SpeedValue = 300
+local LockPosEnabled = false
+local LockPosition = Vector3.zero
+local AntiLagEnabled = false
+local AntiAfkEnabled = false
+local AntiAfkConnection = nil
+local AntiAfkLoop = nil
 
--- AUTO GOLPE ⬇️ NUEVO
+-- ==============================================
+-- PESTAÑA MAIN
+-- ==============================================
+local MainTab = Window:CreateTab("🏠 Main", nil)
+MainTab:CreateSection("Auto Farm")
+
+-- AUTO GOLPE
 MainTab:CreateToggle({
     Name = "👊 AUTO GOLPE",
     CurrentValue = false,
@@ -84,25 +94,18 @@ MainTab:CreateToggle({
     Callback = function(Value)
         AutoPunch = Value
         task.spawn(function()
-            local player = game:GetService("Players").LocalPlayer
             while AutoPunch do
-                local char = player.Character
+                local char = LocalPlayer.Character
                 if char and char:FindFirstChildOfClass("Humanoid") then
-                    -- Equipar herramienta de golpe
-                    local tool = player.Backpack:FindFirstChild("Punch") or char:FindFirstChild("Punch")
+                    local tool = LocalPlayer.Backpack:FindFirstChild("Punch") or char:FindFirstChild("Punch")
                     if tool then
-                        if tool.Parent ~= char then 
-                            char.Humanoid:EquipTool(tool) 
-                        end
+                        if tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
                         tool:Activate()
                     end
-                    -- Ejecutar el golpe tal como lo proporcionaste
-                    local event = player:FindFirstChild("muscleEvent")
-                    if event then
-                        event:FireServer("punch", "leftHand")
-                    end
+                    local event = char:FindFirstChild("muscleEvent") or LocalPlayer:FindFirstChild("muscleEvent")
+                    if event then event:FireServer("punch", "leftHand") end
                 end
-                task.wait(0.3) -- Ajusta la velocidad de golpes
+                task.wait(0.3)
             end
         end)
     end,
@@ -116,19 +119,18 @@ MainTab:CreateToggle({
     Callback = function(Value)
         AutoWeight = Value
         task.spawn(function()
-            local player = game:GetService("Players").LocalPlayer
             while AutoWeight do
-                local char = player.Character
+                local char = LocalPlayer.Character
                 if char and char:FindFirstChildOfClass("Humanoid") then
-                    local tool = player.Backpack:FindFirstChild("Weight") or char:FindFirstChild("Weight")
+                    local tool = LocalPlayer.Backpack:FindFirstChild("Weight") or char:FindFirstChild("Weight")
                     if tool then
                         if tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
                         tool:Activate()
                     end
-                    local event = player:FindFirstChild("muscleEvent")
+                    local event = char:FindFirstChild("muscleEvent") or LocalPlayer:FindFirstChild("muscleEvent")
                     if event then event:FireServer("rep") end
                 end
-                task.wait()
+                task.wait(0.4)
             end
         end)
     end,
@@ -142,19 +144,18 @@ MainTab:CreateToggle({
     Callback = function(Value)
         AutoPushup = Value
         task.spawn(function()
-            local player = game:GetService("Players").LocalPlayer
             while AutoPushup do
-                local char = player.Character
+                local char = LocalPlayer.Character
                 if char and char:FindFirstChildOfClass("Humanoid") then
-                    local tool = player.Backpack:FindFirstChild("Pushup") or player.Backpack:FindFirstChild("Pushups") or char:FindFirstChild("Pushup") or char:FindFirstChild("Pushups")
+                    local tool = LocalPlayer.Backpack:FindFirstChild("Pushup") or LocalPlayer.Backpack:FindFirstChild("Pushups") or char:FindFirstChild("Pushup") or char:FindFirstChild("Pushups")
                     if tool then
                         if tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
                         tool:Activate()
                     end
-                    local event = player:FindFirstChild("muscleEvent")
+                    local event = char:FindFirstChild("muscleEvent") or LocalPlayer:FindFirstChild("muscleEvent")
                     if event then event:FireServer("rep") end
                 end
-                task.wait()
+                task.wait(0.4)
             end
         end)
     end,
@@ -168,19 +169,18 @@ MainTab:CreateToggle({
     Callback = function(Value)
         AutoSitups = Value
         task.spawn(function()
-            local player = game:GetService("Players").LocalPlayer
             while AutoSitups do
-                local char = player.Character
+                local char = LocalPlayer.Character
                 if char and char:FindFirstChildOfClass("Humanoid") then
-                    local tool = player.Backpack:FindFirstChild("Situps") or player.Backpack:FindFirstChild("Situp") or char:FindFirstChild("Situps") or char:FindFirstChild("Situp")
+                    local tool = LocalPlayer.Backpack:FindFirstChild("Situps") or LocalPlayer.Backpack:FindFirstChild("Situp") or char:FindFirstChild("Situps") or char:FindFirstChild("Situp")
                     if tool then
                         if tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
                         tool:Activate()
                     end
-                    local event = player:FindFirstChild("muscleEvent")
+                    local event = char:FindFirstChild("muscleEvent") or LocalPlayer:FindFirstChild("muscleEvent")
                     if event then event:FireServer("rep") end
                 end
-                task.wait()
+                task.wait(0.4)
             end
         end)
     end,
@@ -194,19 +194,18 @@ MainTab:CreateToggle({
     Callback = function(Value)
         AutoHandstand = Value
         task.spawn(function()
-            local player = game:GetService("Players").LocalPlayer
             while AutoHandstand do
-                local char = player.Character
+                local char = LocalPlayer.Character
                 if char and char:FindFirstChildOfClass("Humanoid") then
-                    local tool = player.Backpack:FindFirstChild("Handstand") or player.Backpack:FindFirstChild("Handstands") or char:FindFirstChild("Handstand") or char:FindFirstChild("Handstands")
+                    local tool = LocalPlayer.Backpack:FindFirstChild("Handstand") or LocalPlayer.Backpack:FindFirstChild("Handstands") or char:FindFirstChild("Handstand") or char:FindFirstChild("Handstands")
                     if tool then
                         if tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
                         tool:Activate()
                     end
-                    local event = player:FindFirstChild("muscleEvent")
+                    local event = char:FindFirstChild("muscleEvent") or LocalPlayer:FindFirstChild("muscleEvent")
                     if event then event:FireServer("rep") end
                 end
-                task.wait()
+                task.wait(0.4)
             end
         end)
     end,
@@ -235,37 +234,139 @@ MainTab:CreateToggle({
             end
         end)
     end,
-}) 
+})
 
--- Pestaña Pets
-local PetsTab = Window:CreateTab("🐾 Pets", nil)
-PetsTab:CreateSection("EGG FARM")
-
--- Pestaña Misc
+-- ==============================================
+-- PESTAÑA MISC
+-- ==============================================
 local MiscTab = Window:CreateTab("⚙️ Misc", nil)
 MiscTab:CreateSection("Utilidades")
 
-local AntiAfk = false
-local AntiAfkConnection
-
+-- 🚀 SPEED 300
 MiscTab:CreateToggle({
-    Name = "🛡️ Anti AFK",
+    Name = "🚀 Speed 300",
     CurrentValue = false,
-    Flag = "AntiAfk",
+    Flag = "Speed300",
     Callback = function(Value)
-        AntiAfk = Value
-        if AntiAfk then
-            local VirtualUser = game:GetService("VirtualUser")
-            local Players = game:GetService("Players")
-            AntiAfkConnection = Players.LocalPlayer.Idled:Connect(function()
-                VirtualUser:CaptureController()
-                VirtualUser:ClickButton2(Vector2.new(0, 0))
-            end)
-        else
-            if AntiAfkConnection then
-                AntiAfkConnection:Disconnect()
-                AntiAfkConnection = nil
+        SpeedEnabled = Value
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            if SpeedEnabled then
+                SpeedOriginal = char.Humanoid.WalkSpeed
+                char.Humanoid.WalkSpeed = SpeedValue
+            else
+                char.Humanoid.WalkSpeed = SpeedOriginal
             end
         end
     end,
 })
+
+-- 📍 LOCK POSITION
+MiscTab:CreateToggle({
+    Name = "📍 Lock Position",
+    CurrentValue = false,
+    Flag = "LockPosition",
+    Callback = function(Value)
+        LockPosEnabled = Value
+        local char = LocalPlayer.Character
+        if char and char.PrimaryPart then
+            LockPosition = char.PrimaryPart.Position
+        end
+    end,
+})
+
+-- 🔧 ANTI LAG
+MiscTab:CreateToggle({
+    Name = "🔧 Anti Lag",
+    CurrentValue = false,
+    Flag = "AntiLag",
+    Callback = function(Value)
+        AntiLagEnabled = Value
+        if AntiLagEnabled then
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+            settings().Physics.StreamingEnabled = false
+            if game.Lighting then
+                game.Lighting.Technology = Enum.LightingTechnology.Compatibility
+            end
+        else
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level21
+            settings().Physics.StreamingEnabled = true
+        end
+    end,
+})
+
+-- 🛡️ ANTI AFK MEJORADO
+MiscTab:CreateToggle({
+    Name = "🛡️ Anti AFK (Mejorado)",
+    CurrentValue = false,
+    Flag = "AntiAfk",
+    Callback = function(Value)
+        AntiAfkEnabled = Value
+        if AntiAfkEnabled then
+            local VirtualUser = game:GetService("VirtualUser")
+            AntiAfkConnection = LocalPlayer.Idled:Connect(function()
+                VirtualUser:CaptureController()
+                VirtualUser:Button2Down(Vector2.new(0, 0), CoreGui.CurrentCamera and CoreGui.CurrentCamera.ViewportSize or Vector2.new(1920, 1080))
+                task.wait(0.15)
+                VirtualUser:Button2Up(Vector2.new(0, 0), CoreGui.CurrentCamera and CoreGui.CurrentCamera.ViewportSize or Vector2.new(1920, 1080))
+            end)
+            -- Loop de seguridad cada 4 min
+            AntiAfkLoop = task.spawn(function()
+                while AntiAfkEnabled do
+                    task.wait(240)
+                    if not AntiAfkEnabled then return end
+                    pcall(function()
+                        VirtualUser:CaptureController()
+                        VirtualUser:ClickButton1(Vector2.new(0,0))
+                    end)
+                end
+            end)
+        else
+            if AntiAfkConnection then AntiAfkConnection:Disconnect() AntiAfkConnection = nil end
+            if AntiAfkLoop then task.cancel(AntiAfkLoop) AntiAfkLoop = nil end
+        end
+    end,
+})
+
+-- ==============================================
+-- BUCLES GLOBALES
+-- ==============================================
+RunService.Heartbeat:Connect(function()
+    -- Lock Position
+    if LockPosEnabled then
+        local char = LocalPlayer.Character
+        if char and char.PrimaryPart then
+            char.PrimaryPart.CFrame = CFrame.new(LockPosition)
+        end
+    end
+    -- Mantener velocidad
+    if SpeedEnabled then
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChildOfClass("Humanoid") and char.Humanoid.WalkSpeed ~= SpeedValue then
+            char.Humanoid.WalkSpeed = SpeedValue
+        end
+    end
+    -- AntiLag: desactivar efectos
+    if AntiLagEnabled then
+        local char = LocalPlayer.Character
+        if char then
+            for _, v in ipairs(char:GetChildren()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") then v.Enabled = false end
+                if v:IsA("PointLight") or v:IsA("SpotLight") then v.Enabled = false end
+            end
+        end
+    end
+end)
+
+-- Restaurar velocidad al respawnear
+LocalPlayer.CharacterAdded:Connect(function(char)
+    char:WaitForChild("Humanoid", 10)
+    task.wait(0.5)
+    if SpeedEnabled and char:FindFirstChild("Humanoid") then
+        char.Humanoid.WalkSpeed = SpeedValue
+    end
+end)
+
+-- Pestaña Pets
+local PetsTab = Window:CreateTab("🐾 Pets", nil)
+PetsTab:CreateSection("EGG FARM")
