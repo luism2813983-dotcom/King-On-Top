@@ -12,7 +12,7 @@ local Window = Rayfield:CreateWindow({
    },
    Discord = {
       Enabled = true,
-      Invite = "https://discord.gg/ayt6qxRca",
+      Invite = "ayt6qxRca",
       RememberJoins = true
    },
    KeySystem = true,
@@ -74,6 +74,39 @@ local AutoSitups = false
 local AutoHandstand = false
 local AutoRebirth = false
 local AutoRebirthMax = false
+local AutoPunch = false
+
+-- AUTO GOLPE ⬇️ NUEVO
+MainTab:CreateToggle({
+    Name = "👊 AUTO GOLPE",
+    CurrentValue = false,
+    Flag = "AutoPunch",
+    Callback = function(Value)
+        AutoPunch = Value
+        task.spawn(function()
+            local player = game:GetService("Players").LocalPlayer
+            while AutoPunch do
+                local char = player.Character
+                if char and char:FindFirstChildOfClass("Humanoid") then
+                    -- Equipar herramienta de golpe
+                    local tool = player.Backpack:FindFirstChild("Punch") or char:FindFirstChild("Punch")
+                    if tool then
+                        if tool.Parent ~= char then 
+                            char.Humanoid:EquipTool(tool) 
+                        end
+                        tool:Activate()
+                    end
+                    -- Ejecutar el golpe tal como lo proporcionaste
+                    local event = player:FindFirstChild("muscleEvent")
+                    if event then
+                        event:FireServer("punch", "leftHand")
+                    end
+                end
+                task.wait(0.3) -- Ajusta la velocidad de golpes
+            end
+        end)
+    end,
+})
 
 -- AUTO WEIGHT
 MainTab:CreateToggle({
