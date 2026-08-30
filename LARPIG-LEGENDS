@@ -15,16 +15,7 @@ local Window = Rayfield:CreateWindow({
       Invite = "ayt6qxRca",
       RememberJoins = true
    },
-   KeySystem = true,
-   KeySettings = {
-      Title = "Untitled",
-      Subtitle = "KINGONTOP System",
-      Note = "Key en el grupo de discord clan",
-      FileName = "Key",
-      SaveKey = true,
-      GrabKeyFromSite = true,
-      Key = {"KINGONTOP"}
-   }
+   KeySystem = false
 })
 
 -- /////////////////////////////////////////////////
@@ -64,18 +55,9 @@ task.spawn(function()
 end)
 
 -- /////////////////////////////////////////////////
--- 🔧 SISTEMA ANTI LAG / OPTIMIZACIÓN
+-- 🔧 SISTEMA ANTI LAG (UN SOLO BOTÓN)
 -- /////////////////////////////////////////////////
 local AntiLagEnabled = false
-local AntiLagSettings = {
-    ClearDebris = true,
-    DisableParticles = true,
-    DisableShadows = true,
-    DisableEffects = true,
-    LowDetailParts = true,
-    ClearChat = false,
-    OptimizeRendering = true
-}
 
 local function ApplyAntiLag()
     local Workspace = game:GetService("Workspace")
@@ -83,101 +65,84 @@ local function ApplyAntiLag()
     local Players = game:GetService("Players")
     local LocalPlayer = Players.LocalPlayer
 
-    -- 🧹 Limpiar restos y objetos innecesarios
-    if AntiLagSettings.ClearDebris then
-        pcall(function()
-            for _, v in pairs(Workspace:GetChildren()) do
-                if v:IsA("BasePart") and v.Name == "Debris" or v.Name == "Effect" or v.Name == "Particle" then
-                    pcall(function() v:Destroy() end)
-                end
-            end
-            -- Limpiar periódicamente
-            task.spawn(function()
-                while AntiLagEnabled and AntiLagSettings.ClearDebris do
-                    task.wait(3)
-                    for _, v in pairs(Workspace:GetChildren()) do
-                        if v:IsA("BasePart") and v.Name == "Debris" then
-                            pcall(function() v:Destroy() end)
-                        end
+    -- 🧹 Limpiar restos
+    pcall(function()
+        task.spawn(function()
+            while AntiLagEnabled do
+                task.wait(3)
+                for _, v in pairs(Workspace:GetChildren()) do
+                    if v:IsA("BasePart") and (v.Name == "Debris" or v.Name == "Effect" or v.Name == "Particle") then
+                        pcall(function() v:Destroy() end)
                     end
                 end
-            end)
+            end
         end)
-    end
+    end)
 
     -- ✨ Desactivar partículas
-    if AntiLagSettings.DisableParticles then
-        pcall(function()
-            for _, v in pairs(Workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("SmokeEmitter") or v:IsA("Fire") or v:IsA("Sparkles") then
-                    v.Enabled = false
-                end
+    pcall(function()
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("SmokeEmitter") or v:IsA("Fire") or v:IsA("Sparkles") then
+                v.Enabled = false
             end
-            -- Detectar nuevas partículas
-            task.spawn(function()
-                while AntiLagEnabled and AntiLagSettings.DisableParticles do
-                    task.wait(1)
-                    for _, v in pairs(Workspace:GetDescendants()) do
-                        if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("SmokeEmitter") or v:IsA("Fire") or v:IsA("Sparkles") then
-                            v.Enabled = false
-                        end
+        end
+        task.spawn(function()
+            while AntiLagEnabled do
+                task.wait(1)
+                for _, v in pairs(Workspace:GetDescendants()) do
+                    if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("SmokeEmitter") or v:IsA("Fire") or v:IsA("Sparkles") then
+                        v.Enabled = false
                     end
                 end
-            end)
-        end)
-    end
-
-    -- 🌑 Sombras y efectos de iluminación
-    if AntiLagSettings.DisableShadows then
-        pcall(function()
-            Lighting.GlobalShadows = false
-            Lighting.FogEnd = 100000
-            Lighting.Brightness = 1
-            Lighting.EnvironmentSpecularScale = 0
-            Lighting.EnvironmentDiffuseScale = 0
-        end)
-    end
-
-    -- 🎨 Calidad gráfica y detalles
-    if AntiLagSettings.LowDetailParts then
-        pcall(function()
-            for _, v in pairs(Workspace:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CastShadow = false
-                    v.Material = Enum.Material.Plastic
-                    v.Reflectance = 0
-                end
             end
         end)
-    end
+    end)
 
-    -- 🖼️ Calidad de renderizado
-    if AntiLagSettings.OptimizeRendering then
-        pcall(function()
-            LocalPlayer:SetAttribute("QualityLevel", 1)
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Level1
-            settings().Rendering.Mode = Enum.RenderMode.Direct3D
-        end)
-    end
+    -- 🌑 Sombras y luces
+    pcall(function()
+        Lighting.GlobalShadows = false
+        Lighting.FogEnd = 100000
+        Lighting.Brightness = 1
+        Lighting.EnvironmentSpecularScale = 0
+        Lighting.EnvironmentDiffuseScale = 0
+    end)
+
+    -- 🎨 Calidad gráfica
+    pcall(function()
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CastShadow = false
+                v.Material = Enum.Material.Plastic
+                v.Reflectance = 0
+            end
+        end
+    end)
+
+    -- 🖼️ Renderizado
+    pcall(function()
+        LocalPlayer:SetAttribute("QualityLevel", 1)
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level1
+        settings().Rendering.Mode = Enum.RenderMode.Direct3D
+    end)
 end
 
 local function DisableAntiLag()
     local Lighting = game:GetService("Lighting")
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
-
-    -- Restaurar iluminación
     pcall(function()
         Lighting.GlobalShadows = true
         Lighting.FogEnd = 100000
         Lighting.Brightness = 2
     end)
-
-    -- Restaurar calidad
     pcall(function()
         settings().Rendering.QualityLevel = Enum.QualityLevel.Level8
     end)
 end
+
+-- /////////////////////////////////////////////////
+-- 🏃 SISTEMA DE VELOCIDAD 300
+-- /////////////////////////////////////////////////
+local Speed300 = false
+local OriginalSpeed = 16
 
 -- Pestaña Main
 local MainTab = Window:CreateTab("🏠 Main", nil)
@@ -374,7 +339,7 @@ PetsTab:CreateToggle({
     end,
 })
 
--- ✨ AUTO CRYSTAL 1Qi ✨
+-- ✨ AUTO CRYSTAL 1Qi — CORREGIDO (Funciona desde cualquier lugar)
 local AutoCrystal1Qi = false
 
 PetsTab:CreateToggle({
@@ -388,11 +353,14 @@ PetsTab:CreateToggle({
             while AutoCrystal1Qi do
                 local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
                 if rEvents and rEvents:FindFirstChild("openCrystalRemote") then
-                    rEvents.openCrystalRemote:InvokeServer(
-                        "openCrystalBatch",
-                        "RIBS Secret Crystal",
-                        10
-                    )
+                    local OpenCrystalRemote = rEvents.openCrystalRemote
+                    pcall(function()
+                        if OpenCrystalRemote:IsA("RemoteFunction") then
+                            OpenCrystalRemote:InvokeServer("openCrystalBatch", "RIBS Secret Crystal", 10)
+                        elseif OpenCrystalRemote:IsA("RemoteEvent") then
+                            OpenCrystalRemote:FireServer("openCrystalBatch", "RIBS Secret Crystal", 10)
+                        end
+                    end)
                 end
                 task.wait(0.1)
             end
@@ -400,11 +368,45 @@ PetsTab:CreateToggle({
     end,
 })
 
--- ⚙️ Pestaña Misc — INCLUIDO ANTI LAG 🔧
+-- ⚙️ Pestaña Misc
 local MiscTab = Window:CreateTab("⚙️ Misc", nil)
-MiscTab:CreateSection("🔧 OPTIMIZACIÓN & ANTI LAG")
+MiscTab:CreateSection("🏃 VELOCIDAD & MOVIMIENTO")
 
--- 🔧 ANTI LAG PRINCIPAL
+-- 🏃 SPEED 300
+MiscTab:CreateToggle({
+    Name = "🏃 VELOCIDAD 300",
+    CurrentValue = false,
+    Flag = "Speed300",
+    Callback = function(Value)
+        Speed300 = Value
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        if Speed300 then
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                OriginalSpeed = LocalPlayer.Character.Humanoid.WalkSpeed
+                LocalPlayer.Character.Humanoid.WalkSpeed = 300
+            end
+            Rayfield:Notify({Title = "🏃 VELOCIDAD ACTIVADA", Content = "Velocidad fijada en 300", Duration = 3})
+        else
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                LocalPlayer.Character.Humanoid.WalkSpeed = OriginalSpeed
+            end
+            Rayfield:Notify({Title = "🐢 VELOCIDAD DESACTIVADA", Content = "Velocidad restaurada", Duration = 3})
+        end
+    end,
+})
+
+-- Mantener velocidad al respawnear
+game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function(character)
+    task.wait(0.1)
+    if Speed300 and character:FindFirstChildOfClass("Humanoid") then
+        character.Humanoid.WalkSpeed = 300
+    end
+end)
+
+MiscTab:CreateSection("🚀 OPTIMIZACIÓN")
+
+-- 🔧 ANTI LAG — UN SOLO BOTÓN
 MiscTab:CreateToggle({
     Name = "🚀 ANTI LAG COMPLETO",
     CurrentValue = false,
@@ -413,67 +415,17 @@ MiscTab:CreateToggle({
         AntiLagEnabled = Value
         if AntiLagEnabled then
             ApplyAntiLag()
-            Rayfield:Notify({
-                Title = "🚀 ANTI LAG ACTIVADO",
-                Content = "Optimizando rendimiento...",
-                Duration = 3
-            })
+            Rayfield:Notify({Title = "🚀 ANTI LAG ACTIVADO", Content = "Todo optimizado con un solo clic ✅", Duration = 3})
         else
             DisableAntiLag()
-            Rayfield:Notify({
-                Title = "🔓 ANTI LAG DESACTIVADO",
-                Content = "Restaurando calidad gráfica",
-                Duration = 3
-            })
+            Rayfield:Notify({Title = "🔓 ANTI LAG DESACTIVADO", Content = "Calidad gráfica restaurada", Duration = 3})
         end
-    end,
-})
-
--- 🧹 Limpiar restos
-MiscTab:CreateToggle({
-    Name = "🧹 Limpiar restos/partículas",
-    CurrentValue = true,
-    Flag = "ClearDebris",
-    Callback = function(Value)
-        AntiLagSettings.ClearDebris = Value
-    end,
-})
-
--- ✨ Desactivar efectos
-MiscTab:CreateToggle({
-    Name = "✨ Desactivar efectos visuales",
-    CurrentValue = true,
-    Flag = "DisableEffects",
-    Callback = function(Value)
-        AntiLagSettings.DisableParticles = Value
-        AntiLagSettings.DisableEffects = Value
-    end,
-})
-
--- 🌑 Sombras y luces
-MiscTab:CreateToggle({
-    Name = "🌑 Desactivar sombras/luces",
-    CurrentValue = true,
-    Flag = "DisableShadows",
-    Callback = function(Value)
-        AntiLagSettings.DisableShadows = Value
-    end,
-})
-
--- 🖼️ Calidad gráfica baja
-MiscTab:CreateToggle({
-    Name = "🖼️ Calidad gráfica mínima",
-    CurrentValue = true,
-    Flag = "LowQuality",
-    Callback = function(Value)
-        AntiLagSettings.LowDetailParts = Value
-        AntiLagSettings.OptimizeRendering = Value
     end,
 })
 
 MiscTab:CreateSection("Utilidades")
 
--- ✨ ANTI AFK MEJORADO ✨
+-- 🛡️ ANTI AFK
 local AntiAfk = false
 local AntiAfkConnection
 
@@ -500,26 +452,18 @@ MiscTab:CreateToggle({
                     end)
                 end
             end)
-            Rayfield:Notify({
-                Title = "🛡️ Anti AFK Activado",
-                Content = "Ya no te echará por inactividad",
-                Duration = 3
-            })
+            Rayfield:Notify({Title = "🛡️ Anti AFK Activado", Content = "Ya no te echará por inactividad", Duration = 3})
         else
             if AntiAfkConnection then
                 AntiAfkConnection:Disconnect()
                 AntiAfkConnection = nil
             end
-            Rayfield:Notify({
-                Title = "🛡️ Anti AFK Desactivado",
-                Content = "Podrían echarte por inactividad",
-                Duration = 3
-            })
+            Rayfield:Notify({Title = "🛡️ Anti AFK Desactivado", Content = "Podrían echarte por inactividad", Duration = 3})
         end
     end,
 })
 
--- ✨ LOCK POSITION ✨
+-- 📍 LOCK POSITION
 local LockPosition = false
 local SavedPosition = nil
 local Players = game:GetService("Players")
@@ -534,19 +478,11 @@ MiscTab:CreateToggle({
         if LockPosition then
             if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 SavedPosition = player.Character.HumanoidRootPart.Position
-                Rayfield:Notify({
-                    Title = "📍 Posición Bloqueada",
-                    Content = "Posición guardada correctamente!",
-                    Duration = 3
-                })
+                Rayfield:Notify({Title = "📍 Posición Bloqueada", Content = "Posición guardada correctamente!", Duration = 3})
             end
         else
             SavedPosition = nil
-            Rayfield:Notify({
-                Title = "📍 Posición Desbloqueada",
-                Content = "Ya puedes moverte libremente",
-                Duration = 3
-            })
+            Rayfield:Notify({Title = "📍 Posición Desbloqueada", Content = "Ya puedes moverte libremente", Duration = 3})
         end
     end,
 })
@@ -572,11 +508,7 @@ player.CharacterAdded:Connect(function()
         local char = player.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
             char.HumanoidRootPart.CFrame = CFrame.new(SavedPosition)
-            Rayfield:Notify({
-                Title = "📍 Posición Restaurada",
-                Content = "Reapareciste en tu posición!",
-                Duration = 2
-            })
+            Rayfield:Notify({Title = "📍 Posición Restaurada", Content = "Reapareciste en tu posición!", Duration = 2})
         end
     end
 end)
