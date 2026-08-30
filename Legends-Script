@@ -28,7 +28,7 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- /////////////////////////////////////////////////
--- PARTE DEL FONDO DE PANTALLA
+-- FONDO DE PANTALLA
 -- /////////////////////////////////////////////////
 local function ApplyCustomBackground(targetCoreGui, imageId, transparency)
     local backgroundImage = Instance.new("ImageLabel")
@@ -62,7 +62,6 @@ task.spawn(function()
         end
     end
 end)
--- /////////////////////////////////////////////////
 
 -- Pestaña Main
 local MainTab = Window:CreateTab("🏠 Main", nil)
@@ -204,35 +203,114 @@ MainTab:CreateToggle({
     end,
 }) 
 
--- AUTO RENACIMIENTO MAXIMO
+-- ⚡ AUTO RENACIMIENTO MÁXIMO — ARREGLADO ✅
 MainTab:CreateToggle({
-    Name = "⚡ AUTO RENACIMIENTO MAXIMO",
+    Name = "⚡ AUTO RENACIMIENTO MÁXIMO",
     CurrentValue = false,
     Flag = "AutoRebirthMax",
     Callback = function(Value)
         AutoRebirthMax = Value
         task.spawn(function()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            
+            local rebirthEvent
+            repeat
+                local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+                rebirthEvent = rEvents and rEvents:FindFirstChild("rebirthRemote")
+                task.wait(0.1)
+            until rebirthEvent or not AutoRebirthMax
+            
+            if not rebirthEvent then
+                Rayfield:Notify({
+                    Title = "❌ Error",
+                    Content = "No se encontró el evento de renacimiento",
+                    Duration = 5
+                })
+                return
+            end
+
+            Rayfield:Notify({
+                Title = "✅ Activado",
+                Content = "Renacimiento máximo automático...",
+                Duration = 3
+            })
+
             while AutoRebirthMax do
-                local rEvents = game:GetService("ReplicatedStorage"):FindFirstChild("rEvents")
-                if rEvents and rEvents:FindFirstChild("rebirthRemote") then
-                    local Event = rEvents.rebirthRemote
-                    if Event:IsA("RemoteFunction") then
-                        Event:InvokeServer("massRebirthRequest", "MAX")
-                    elseif Event:IsA("RemoteEvent") then
-                        Event:FireServer("massRebirthRequest", "MAX")
+                pcall(function()
+                    if rebirthEvent:IsA("RemoteFunction") then
+                        rebirthEvent:InvokeServer("rebirthRequest", 142086)
+                    else
+                        rebirthEvent:FireServer("rebirthRequest", 142086)
                     end
-                end
+                end)
                 task.wait(0.5)
             end
         end)
     end,
 })
 
--- Pestaña Pets
+-- 🐾 Pestaña Pets — Auto Cristal desde CUALQUIER LUGAR 💎
 local PetsTab = Window:CreateTab("🐾 Pets", nil)
 PetsTab:CreateSection("EGG FARM")
 
--- Pestaña Misc
+local AutoCrystal = false
+
+PetsTab:CreateToggle({
+    Name = "💎 Auto Abrir Cristal (CUALQUIER LUGAR)",
+    CurrentValue = false,
+    Flag = "AutoCrystal",
+    Callback = function(Value)
+        AutoCrystal = Value
+        task.spawn(function()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local Players = game:GetService("Players")
+            local LocalPlayer = Players.LocalPlayer
+            
+            local openEvent
+            repeat
+                local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+                openEvent = rEvents and rEvents:FindFirstChild("openCrystalRemote")
+                task.wait(0.1)
+            until openEvent or not AutoCrystal
+            
+            if not openEvent then
+                Rayfield:Notify({Title = "❌ Error", Content = "No se encontró el evento de cristales", Duration = 5})
+                return
+            end
+
+            Rayfield:Notify({Title = "✅ Activado", Content = "Abriendo desde cualquier lugar...", Duration = 3})
+
+            while AutoCrystal do
+                local char = LocalPlayer.Character
+                if not char or not char:FindFirstChild("HumanoidRootPart") then 
+                    task.wait(0.5) 
+                    continue 
+                end
+
+                local crystalPart = nil
+                for _, v in pairs(workspace:GetDescendants()) do
+                    if v:IsA("BasePart") and v.Name == "Weakness Crystal" then
+                        crystalPart = v
+                        break
+                    end
+                end
+
+                if crystalPart then
+                    local originalPosition = char.HumanoidRootPart.CFrame
+                    char.HumanoidRootPart.CFrame = crystalPart.CFrame + Vector3.new(0, 2, 0)
+                    task.wait(0.03)
+                    openEvent:InvokeServer("openCrystal", "Weakness Crystal")
+                    task.wait(0.03)
+                    char.HumanoidRootPart.CFrame = originalPosition
+                end
+
+                task.wait(0.5)
+            end
+        end)
+    end,
+})
+
+-- ⚙️ Pestaña Misc
 local MiscTab = Window:CreateTab("⚙️ Misc", nil)
 MiscTab:CreateSection("Utilidades")
 
