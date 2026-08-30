@@ -28,7 +28,7 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- /////////////////////////////////////////////////
--- PARTE DEL FONDO DE PANTALLA
+-- FONDO DE PANTALLA
 -- /////////////////////////////////////////////////
 local function ApplyCustomBackground(targetCoreGui, imageId, transparency)
     local backgroundImage = Instance.new("ImageLabel")
@@ -62,7 +62,122 @@ task.spawn(function()
         end
     end
 end)
+
 -- /////////////////////////////////////////////////
+-- 🔧 SISTEMA ANTI LAG / OPTIMIZACIÓN
+-- /////////////////////////////////////////////////
+local AntiLagEnabled = false
+local AntiLagSettings = {
+    ClearDebris = true,
+    DisableParticles = true,
+    DisableShadows = true,
+    DisableEffects = true,
+    LowDetailParts = true,
+    ClearChat = false,
+    OptimizeRendering = true
+}
+
+local function ApplyAntiLag()
+    local Workspace = game:GetService("Workspace")
+    local Lighting = game:GetService("Lighting")
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+
+    -- 🧹 Limpiar restos y objetos innecesarios
+    if AntiLagSettings.ClearDebris then
+        pcall(function()
+            for _, v in pairs(Workspace:GetChildren()) do
+                if v:IsA("BasePart") and v.Name == "Debris" or v.Name == "Effect" or v.Name == "Particle" then
+                    pcall(function() v:Destroy() end)
+                end
+            end
+            -- Limpiar periódicamente
+            task.spawn(function()
+                while AntiLagEnabled and AntiLagSettings.ClearDebris do
+                    task.wait(3)
+                    for _, v in pairs(Workspace:GetChildren()) do
+                        if v:IsA("BasePart") and v.Name == "Debris" then
+                            pcall(function() v:Destroy() end)
+                        end
+                    end
+                end
+            end)
+        end)
+    end
+
+    -- ✨ Desactivar partículas
+    if AntiLagSettings.DisableParticles then
+        pcall(function()
+            for _, v in pairs(Workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("SmokeEmitter") or v:IsA("Fire") or v:IsA("Sparkles") then
+                    v.Enabled = false
+                end
+            end
+            -- Detectar nuevas partículas
+            task.spawn(function()
+                while AntiLagEnabled and AntiLagSettings.DisableParticles do
+                    task.wait(1)
+                    for _, v in pairs(Workspace:GetDescendants()) do
+                        if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("SmokeEmitter") or v:IsA("Fire") or v:IsA("Sparkles") then
+                            v.Enabled = false
+                        end
+                    end
+                end
+            end)
+        end)
+    end
+
+    -- 🌑 Sombras y efectos de iluminación
+    if AntiLagSettings.DisableShadows then
+        pcall(function()
+            Lighting.GlobalShadows = false
+            Lighting.FogEnd = 100000
+            Lighting.Brightness = 1
+            Lighting.EnvironmentSpecularScale = 0
+            Lighting.EnvironmentDiffuseScale = 0
+        end)
+    end
+
+    -- 🎨 Calidad gráfica y detalles
+    if AntiLagSettings.LowDetailParts then
+        pcall(function()
+            for _, v in pairs(Workspace:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v.CastShadow = false
+                    v.Material = Enum.Material.Plastic
+                    v.Reflectance = 0
+                end
+            end
+        end)
+    end
+
+    -- 🖼️ Calidad de renderizado
+    if AntiLagSettings.OptimizeRendering then
+        pcall(function()
+            LocalPlayer:SetAttribute("QualityLevel", 1)
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level1
+            settings().Rendering.Mode = Enum.RenderMode.Direct3D
+        end)
+    end
+end
+
+local function DisableAntiLag()
+    local Lighting = game:GetService("Lighting")
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+
+    -- Restaurar iluminación
+    pcall(function()
+        Lighting.GlobalShadows = true
+        Lighting.FogEnd = 100000
+        Lighting.Brightness = 2
+    end)
+
+    -- Restaurar calidad
+    pcall(function()
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level8
+    end)
+end
 
 -- Pestaña Main
 local MainTab = Window:CreateTab("🏠 Main", nil)
@@ -202,7 +317,7 @@ MainTab:CreateToggle({
             end
         end)
     end,
-}) 
+})
 
 -- AUTO RENACIMIENTO MAXIMO
 MainTab:CreateToggle({
@@ -228,7 +343,7 @@ MainTab:CreateToggle({
     end,
 })
 
--- Pestaña Pets
+-- 🐾 Pestaña Pets
 local PetsTab = Window:CreateTab("🐾 Pets", nil)
 PetsTab:CreateSection("EGG FARM")
 
@@ -249,12 +364,10 @@ PetsTab:CreateToggle({
                     [3] = 10,
                     n = 3,
                 }
-                
                 local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
                 if rEvents and rEvents:FindFirstChild("openCrystalRemote") then
                     rEvents.openCrystalRemote:InvokeServer(unpack(args, 1, args.n or #args))
                 end
-                
                 task.wait(0.1)
             end
         end)
@@ -287,8 +400,77 @@ PetsTab:CreateToggle({
     end,
 })
 
--- Pestaña Misc
+-- ⚙️ Pestaña Misc — INCLUIDO ANTI LAG 🔧
 local MiscTab = Window:CreateTab("⚙️ Misc", nil)
+MiscTab:CreateSection("🔧 OPTIMIZACIÓN & ANTI LAG")
+
+-- 🔧 ANTI LAG PRINCIPAL
+MiscTab:CreateToggle({
+    Name = "🚀 ANTI LAG COMPLETO",
+    CurrentValue = false,
+    Flag = "AntiLagMain",
+    Callback = function(Value)
+        AntiLagEnabled = Value
+        if AntiLagEnabled then
+            ApplyAntiLag()
+            Rayfield:Notify({
+                Title = "🚀 ANTI LAG ACTIVADO",
+                Content = "Optimizando rendimiento...",
+                Duration = 3
+            })
+        else
+            DisableAntiLag()
+            Rayfield:Notify({
+                Title = "🔓 ANTI LAG DESACTIVADO",
+                Content = "Restaurando calidad gráfica",
+                Duration = 3
+            })
+        end
+    end,
+})
+
+-- 🧹 Limpiar restos
+MiscTab:CreateToggle({
+    Name = "🧹 Limpiar restos/partículas",
+    CurrentValue = true,
+    Flag = "ClearDebris",
+    Callback = function(Value)
+        AntiLagSettings.ClearDebris = Value
+    end,
+})
+
+-- ✨ Desactivar efectos
+MiscTab:CreateToggle({
+    Name = "✨ Desactivar efectos visuales",
+    CurrentValue = true,
+    Flag = "DisableEffects",
+    Callback = function(Value)
+        AntiLagSettings.DisableParticles = Value
+        AntiLagSettings.DisableEffects = Value
+    end,
+})
+
+-- 🌑 Sombras y luces
+MiscTab:CreateToggle({
+    Name = "🌑 Desactivar sombras/luces",
+    CurrentValue = true,
+    Flag = "DisableShadows",
+    Callback = function(Value)
+        AntiLagSettings.DisableShadows = Value
+    end,
+})
+
+-- 🖼️ Calidad gráfica baja
+MiscTab:CreateToggle({
+    Name = "🖼️ Calidad gráfica mínima",
+    CurrentValue = true,
+    Flag = "LowQuality",
+    Callback = function(Value)
+        AntiLagSettings.LowDetailParts = Value
+        AntiLagSettings.OptimizeRendering = Value
+    end,
+})
+
 MiscTab:CreateSection("Utilidades")
 
 -- ✨ ANTI AFK MEJORADO ✨
@@ -304,17 +486,13 @@ MiscTab:CreateToggle({
         if AntiAfk then
             local VirtualUser = game:GetService("VirtualUser")
             local Players = game:GetService("Players")
-            
-            -- Método 1: Bloquear el evento Idled de Roblox
             AntiAfkConnection = Players.LocalPlayer.Idled:Connect(function()
                 VirtualUser:CaptureController()
                 VirtualUser:ClickButton2(Vector2.new(0, 0))
             end)
-
-            -- Método 2: Simular movimiento para juegos más estrictos
             task.spawn(function()
                 while AntiAfk do
-                    task.wait(30) -- Cada 30 segundos simula actividad
+                    task.wait(30)
                     pcall(function()
                         VirtualUser:KeyDown(Enum.KeyCode.W)
                         task.wait(0.05)
@@ -322,7 +500,6 @@ MiscTab:CreateToggle({
                     end)
                 end
             end)
-
             Rayfield:Notify({
                 Title = "🛡️ Anti AFK Activado",
                 Content = "Ya no te echará por inactividad",
@@ -342,7 +519,7 @@ MiscTab:CreateToggle({
     end,
 })
 
--- ✨ LOCK POSITION (NO TE MUEVES INCLUSO SI MUERES) ✨
+-- ✨ LOCK POSITION ✨
 local LockPosition = false
 local SavedPosition = nil
 local Players = game:GetService("Players")
@@ -374,7 +551,6 @@ MiscTab:CreateToggle({
     end,
 })
 
--- Mantener posición bloqueada siempre
 task.spawn(function()
     while true do
         task.wait(0.05)
@@ -390,7 +566,6 @@ task.spawn(function()
     end
 end)
 
--- Restaurar posición al reaparecer
 player.CharacterAdded:Connect(function()
     task.wait(0.3)
     if LockPosition and SavedPosition then
