@@ -12,7 +12,7 @@ local Window = Rayfield:CreateWindow({
    },
    Discord = {
       Enabled = true,
-      Invite = "https://discord.gg/ayt6qxRca",
+      Invite = "ayt6qxRca",
       RememberJoins = true
    },
    KeySystem = true,
@@ -203,7 +203,7 @@ MainTab:CreateToggle({
     end,
 }) 
 
--- ⚡ AUTO RENACIMIENTO MÁXIMO — ARREGLADO ✅
+-- ⚡ AUTO RENACIMIENTO MÁXIMO
 MainTab:CreateToggle({
     Name = "⚡ AUTO RENACIMIENTO MÁXIMO",
     CurrentValue = false,
@@ -253,59 +253,59 @@ MainTab:CreateToggle({
 local PetsTab = Window:CreateTab("🐾 Pets", nil)
 PetsTab:CreateSection("EGG FARM")
 
-local AutoCrystal = false
+-- 💎 AUTO CRYSTAL 25Qi — FUNCIONA DESDE CUALQUIER LUGAR
+local AutoCrystal25Qi = false
 
 PetsTab:CreateToggle({
-    Name = "💎 Auto Abrir Cristal (CUALQUIER LUGAR)",
+    Name = "💎 Auto Crystal 25Qi",
     CurrentValue = false,
-    Flag = "AutoCrystal",
+    Flag = "AutoCrystal25Qi",
     Callback = function(Value)
-        AutoCrystal = Value
+        AutoCrystal25Qi = Value
         task.spawn(function()
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
-            local Players = game:GetService("Players")
-            local LocalPlayer = Players.LocalPlayer
             
-            local openEvent
+            -- Buscar el evento remoto
+            local openCrystalRemote
             repeat
                 local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
-                openEvent = rEvents and rEvents:FindFirstChild("openCrystalRemote")
+                openCrystalRemote = rEvents and rEvents:FindFirstChild("openCrystalRemote")
                 task.wait(0.1)
-            until openEvent or not AutoCrystal
+            until openCrystalRemote or not AutoCrystal25Qi
             
-            if not openEvent then
-                Rayfield:Notify({Title = "❌ Error", Content = "No se encontró el evento de cristales", Duration = 5})
+            if not openCrystalRemote then
+                Rayfield:Notify({
+                    Title = "❌ Error",
+                    Content = "No se encontró el evento del cristal",
+                    Duration = 5
+                })
                 return
             end
 
-            Rayfield:Notify({Title = "✅ Activado", Content = "Abriendo desde cualquier lugar...", Duration = 3})
+            Rayfield:Notify({
+                Title = "✅ Auto Crystal 25Qi",
+                Content = "Activado — Abriendo Weakness Crystal desde cualquier lugar",
+                Duration = 3
+            })
 
-            while AutoCrystal do
-                local char = LocalPlayer.Character
-                if not char or not char:FindFirstChild("HumanoidRootPart") then 
-                    task.wait(0.5) 
-                    continue 
-                end
-
-                local crystalPart = nil
-                for _, v in pairs(workspace:GetDescendants()) do
-                    if v:IsA("BasePart") and v.Name == "Weakness Crystal" then
-                        crystalPart = v
-                        break
+            -- Bucle principal — Envía el evento directamente al servidor
+            while AutoCrystal25Qi do
+                pcall(function()
+                    -- Argumentos EXACTOS confirmados con el sniffer: "openCrystal", "Weakness Crystal"
+                    if openCrystalRemote:IsA("RemoteFunction") then
+                        openCrystalRemote:InvokeServer("openCrystal", "Weakness Crystal")
+                    else
+                        openCrystalRemote:FireServer("openCrystal", "Weakness Crystal")
                     end
-                end
-
-                if crystalPart then
-                    local originalPosition = char.HumanoidRootPart.CFrame
-                    char.HumanoidRootPart.CFrame = crystalPart.CFrame + Vector3.new(0, 2, 0)
-                    task.wait(0.03)
-                    openEvent:InvokeServer("openCrystal", "Weakness Crystal")
-                    task.wait(0.03)
-                    char.HumanoidRootPart.CFrame = originalPosition
-                end
-
-                task.wait(0.5)
+                end)
+                task.wait(0.4) -- Ajusta este valor si te limitan el servidor
             end
+
+            Rayfield:Notify({
+                Title = "⏸️ Auto Crystal 25Qi",
+                Content = "Desactivado",
+                Duration = 2
+            })
         end)
     end,
 })
@@ -335,6 +335,64 @@ MiscTab:CreateToggle({
                 AntiAfkConnection:Disconnect()
                 AntiAfkConnection = nil
             end
+        end
+    end,
+})
+
+-- 🎯 LOCK POSITION — BLOQUEO DE POSICIÓN
+local LockPosition = false
+local OriginalPosition = nil
+local LockPositionConnection = nil
+
+MiscTab:CreateToggle({
+    Name = "🎯 Lock Position",
+    CurrentValue = false,
+    Flag = "LockPosition",
+    Callback = function(Value)
+        LockPosition = Value
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local player = Players.LocalPlayer
+
+        if LockPosition then
+            -- Guardar posición actual al activar
+            local char = player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                OriginalPosition = char.HumanoidRootPart.Position
+                Rayfield:Notify({
+                    Title = "✅ Lock Position",
+                    Content = "Posición bloqueada",
+                    Duration = 2
+                })
+            else
+                LockPosition = false
+                Rayfield:Notify({
+                    Title = "❌ Error",
+                    Content = "No se pudo obtener la posición",
+                    Duration = 3
+                })
+                return
+            end
+
+            -- Bloquear posición cada frame
+            LockPositionConnection = RunService.Heartbeat:Connect(function()
+                local char = player.Character
+                if char and char:FindFirstChild("HumanoidRootPart") and OriginalPosition then
+                    char.HumanoidRootPart.CFrame = CFrame.new(OriginalPosition)
+                end
+            end)
+        else
+            -- Desactivar
+            if LockPositionConnection then
+                LockPositionConnection:Disconnect()
+                LockPositionConnection = nil
+            end
+            OriginalPosition = nil
+            Rayfield:Notify({
+                Title = "🔓 Lock Position",
+                Content = "Posición desbloqueada",
+                Duration = 2
+            })
         end
     end,
 })
