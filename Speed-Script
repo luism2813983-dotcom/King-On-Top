@@ -1,0 +1,241 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "LEGENDS SCRIPT",
+   Icon = 0,
+   LoadingTitle = "LEGENDS",
+   LoadingSubtitle = "by 1_F0",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil,
+      FileName = "LEGENDS SCRIPT"
+   },
+   Discord = {
+      Enabled = true,
+      Invite = "https://discord.gg/ayt6qxRca",
+      RememberJoins = true
+   },
+   KeySystem = true,
+   KeySettings = {
+      Title = "Untitled",
+      Subtitle = "LEGENDS SCRIPT",
+      Note = "SCRIPT PRIVADO",
+      FileName = "Key",
+      SaveKey = true,
+      GrabKeyFromSite = true,
+      Key = {"KING"}
+   }
+})
+
+-- /////////////////////////////////////////////////
+-- PARTE DEL FONDO DE PANTALLA
+-- /////////////////////////////////////////////////
+local function ApplyCustomBackground(targetCoreGui, imageId, transparency)
+    local backgroundImage = Instance.new("ImageLabel")
+    backgroundImage.Name = "RayfieldCustomBackground"
+    backgroundImage.Size = UDim2.new(1, 0, 1, 0)
+    backgroundImage.Position = UDim2.new(0, 0, 0, 0)
+    backgroundImage.Image = "rbxassetid://" .. tostring(imageId)
+    backgroundImage.BackgroundTransparency = 1
+    backgroundImage.ImageTransparency = transparency
+    backgroundImage.ScaleType = Enum.ScaleType.Crop
+    backgroundImage.ZIndex = -1
+
+    local mainFrame = targetCoreGui:FindFirstChild("Main")
+    if mainFrame then
+        backgroundImage.Parent = mainFrame
+        if mainFrame:IsA("Frame") then
+             mainFrame.BackgroundTransparency = 1
+        end
+    else
+        backgroundImage.Parent = targetCoreGui
+    end
+end
+
+task.spawn(function()
+    task.wait(1)
+    local coreGui = game:GetService("CoreGui")
+    for _, gui in ipairs(coreGui:GetChildren()) do
+        if gui.Name == "Rayfield" or (gui:IsA("ScreenGui") and gui:FindFirstChild("Main")) then
+            ApplyCustomBackground(gui, 1787967131252, 0.5)
+            break
+        end
+    end
+end)
+-- /////////////////////////////////////////////////
+
+-- Pestaña Main
+local MainTab = Window:CreateTab("🏠 Main", nil)
+MainTab:CreateSection("Auto Farm")
+
+local AutoWeight = false
+local AutoPushup = false
+local AutoSitups = false
+local AutoHandstand = false
+local AutoRebirth = false
+local AutoRebirthMax = false
+
+-- AUTO WEIGHT
+MainTab:CreateToggle({
+    Name = "🏋️ AUTO WEIGHT",
+    CurrentValue = false,
+    Flag = "AutoWeight",
+    Callback = function(Value)
+        AutoWeight = Value
+        task.spawn(function()
+            local player = game:GetService("Players").LocalPlayer
+            while AutoWeight do
+                local char = player.Character
+                if char and char:FindFirstChildOfClass("Humanoid") then
+                    local tool = player.Backpack:FindFirstChild("Weight") or char:FindFirstChild("Weight")
+                    if tool then
+                        if tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
+                        tool:Activate()
+                    end
+                    local event = player:FindFirstChild("muscleEvent")
+                    if event then event:FireServer("rep") end
+                end
+                task.wait()
+            end
+        end)
+    end,
+})
+
+-- AUTO PUSHUP
+MainTab:CreateToggle({
+    Name = "🤸 Auto Pushup",
+    CurrentValue = false,
+    Flag = "AutoPushup",
+    Callback = function(Value)
+        AutoPushup = Value
+        task.spawn(function()
+            local player = game:GetService("Players").LocalPlayer
+            while AutoPushup do
+                local char = player.Character
+                if char and char:FindFirstChildOfClass("Humanoid") then
+                    local tool = player.Backpack:FindFirstChild("Pushup") or player.Backpack:FindFirstChild("Pushups") or char:FindFirstChild("Pushup") or char:FindFirstChild("Pushups")
+                    if tool then
+                        if tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
+                        tool:Activate()
+                    end
+                    local event = player:FindFirstChild("muscleEvent")
+                    if event then event:FireServer("rep") end
+                end
+                task.wait()
+            end
+        end)
+    end,
+})
+
+-- AUTO ABDOMINALES
+MainTab:CreateToggle({
+    Name = "🧘 Auto Abdominales",
+    CurrentValue = false,
+    Flag = "AutoSitups",
+    Callback = function(Value)
+        AutoSitups = Value
+        task.spawn(function()
+            local player = game:GetService("Players").LocalPlayer
+            while AutoSitups do
+                local char = player.Character
+                if char and char:FindFirstChildOfClass("Humanoid") then
+                    local tool = player.Backpack:FindFirstChild("Situps") or player.Backpack:FindFirstChild("Situp") or char:FindFirstChild("Situps") or char:FindFirstChild("Situp")
+                    if tool then
+                        if tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
+                        tool:Activate()
+                    end
+                    local event = player:FindFirstChild("muscleEvent")
+                    if event then event:FireServer("rep") end
+                end
+                task.wait()
+            end
+        end)
+    end,
+})
+
+-- AUTO PARADA DE MANOS
+MainTab:CreateToggle({
+    Name = "🤸‍♂️ Auto Parada De Manos",
+    CurrentValue = false,
+    Flag = "AutoHandstand",
+    Callback = function(Value)
+        AutoHandstand = Value
+        task.spawn(function()
+            local player = game:GetService("Players").LocalPlayer
+            while AutoHandstand do
+                local char = player.Character
+                if char and char:FindFirstChildOfClass("Humanoid") then
+                    local tool = player.Backpack:FindFirstChild("Handstand") or player.Backpack:FindFirstChild("Handstands") or char:FindFirstChild("Handstand") or char:FindFirstChild("Handstands")
+                    if tool then
+                        if tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
+                        tool:Activate()
+                    end
+                    local event = player:FindFirstChild("muscleEvent")
+                    if event then event:FireServer("rep") end
+                end
+                task.wait()
+            end
+        end)
+    end,
+})
+
+-- AUTO REBIRTH
+MainTab:CreateToggle({
+    Name = "🔄 AUTO REBIRTH",
+    CurrentValue = false,
+    Flag = "AutoRebirth",
+    Callback = function(Value)
+        AutoRebirth = Value
+        task.spawn(function()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            while AutoRebirth do
+                local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+                if rEvents and rEvents:FindFirstChild("rebirthRemote") then
+                    local rebirthRemote = rEvents.rebirthRemote
+                    if rebirthRemote:IsA("RemoteFunction") then
+                        rebirthRemote:InvokeServer("rebirthRequest")
+                    elseif rebirthRemote:IsA("RemoteEvent") then
+                        rebirthRemote:FireServer("rebirthRequest")
+                    end
+                end
+                task.wait(0.5)
+            end
+        end)
+    end,
+}) 
+
+-- Pestaña Pets
+local PetsTab = Window:CreateTab("🐾 Pets", nil)
+PetsTab:CreateSection("EGG FARM")
+
+    end,
+})
+
+-- Pestaña Misc
+local MiscTab = Window:CreateTab("⚙️ Misc", nil)
+MiscTab:CreateSection("Utilidades")
+
+local AntiAfk = false
+local AntiAfkConnection
+
+MiscTab:CreateToggle({
+    Name = "🛡️ Anti AFK",
+    CurrentValue = false,
+    Flag = "AntiAfk",
+    Callback = function(Value)
+        AntiAfk = Value
+        if AntiAfk then
+            local VirtualUser = game:GetService("VirtualUser")
+            local Players = game:GetService("Players")
+            AntiAfkConnection = Players.LocalPlayer.Idled:Connect(function()
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new(0, 0))
+            end)
+        else
+            if AntiAfkConnection then
+                AntiAfkConnection:Disconnect()
+                AntiAfkConnection = nil
+            end
+        end
+    end,
+})
