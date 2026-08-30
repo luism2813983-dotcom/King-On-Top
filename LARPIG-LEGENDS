@@ -12,7 +12,7 @@ local Window = Rayfield:CreateWindow({
    },
    Discord = {
       Enabled = true,
-      Invite = "https://discord.gg/ayt6qxRca",
+      Invite = "ayt6qxRca",
       RememberJoins = true
    },
    KeySystem = true,
@@ -255,7 +255,33 @@ PetsTab:CreateToggle({
                     rEvents.openCrystalRemote:InvokeServer(unpack(args, 1, args.n or #args))
                 end
                 
-                task.wait(0.1) -- Ajustado a 0.1s para evitar desconexiones por spam excesivo de cristales
+                task.wait(0.1)
+            end
+        end)
+    end,
+})
+
+-- ✨ AUTO CRYSTAL 1Qi ✨
+local AutoCrystal1Qi = false
+
+PetsTab:CreateToggle({
+    Name = "💎 Auto Crystal 1Qi",
+    CurrentValue = false,
+    Flag = "AutoCrystal1Qi",
+    Callback = function(Value)
+        AutoCrystal1Qi = Value
+        task.spawn(function()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            while AutoCrystal1Qi do
+                local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+                if rEvents and rEvents:FindFirstChild("openCrystalRemote") then
+                    rEvents.openCrystalRemote:InvokeServer(
+                        "openCrystalBatch",
+                        "RIBS Secret Crystal",
+                        10
+                    )
+                end
+                task.wait(0.1)
             end
         end)
     end,
@@ -289,3 +315,72 @@ MiscTab:CreateToggle({
         end
     end,
 })
+
+-- ✨ LOCK POSITION (NO TE MUEVES INCLUSO SI MUERES) ✨
+local LockPosition = false
+local SavedPosition = nil
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+-- Guardar posición al activar y mantenerla siempre
+MiscTab:CreateToggle({
+    Name = "📍 LOCK POSITION",
+    CurrentValue = false,
+    Flag = "LockPosition",
+    Callback = function(Value)
+        LockPosition = Value
+        if LockPosition then
+            -- Guardar posición actual al activar
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                SavedPosition = player.Character.HumanoidRootPart.Position
+                RayfieldLibrary:Notify({
+                    Title = "📍 Posición Bloqueada",
+                    Content = "Posición guardada correctamente!",
+                    Duration = 3
+                })
+            end
+        else
+            SavedPosition = nil
+            RayfieldLibrary:Notify({
+                Title = "📍 Posición Desbloqueada",
+                Content = "Ya puedes moverte libremente",
+                Duration = 3
+            })
+        end
+    end,
+})
+
+-- Mantener la posición bloqueada siempre (incluso al reaparecer)
+task.spawn(function()
+    while true do
+        task.wait(0.05) -- Cada 0.05s para ser muy preciso
+        if LockPosition and SavedPosition then
+            local char = player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChildOfClass("Humanoid") then
+                local hrp = char.HumanoidRootPart
+                -- Teletransportar si se mueve de la posición guardada
+                if (hrp.Position - SavedPosition).Magnitude > 0.5 then
+                    hrp.CFrame = CFrame.new(SavedPosition)
+                end
+            end
+        end
+    end
+end)
+
+-- Guardar posición cuando el jugador reaparece (si está activado)
+player.CharacterAdded:Connect(function()
+    task.wait(0.1) -- Esperar a que cargue el personaje
+    if LockPosition and SavedPosition then
+        task.wait(0.2) -- Esperar un poquito más
+        local char = player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = CFrame.new(SavedPosition)
+            RayfieldLibrary:Notify({
+                Title = "📍 Posición Restaurada",
+                Content = "Reapareciste en tu posición bloqueada!",
+                Duration = 2
+            })
+        end
+    end
+end)
