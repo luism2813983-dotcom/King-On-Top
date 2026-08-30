@@ -75,48 +75,33 @@ local AutoSitups = false
 local AutoHandstand = false
 local AutoRebirth = false
 local AutoRebirthMax = false
-local OriginalSpeed = 16 -- Velocidad por defecto de Roblox
-local Speed300Active = false -- Estado de velocidad
+local OriginalSpeed = 16
+local Speed300Active = false
 
--- ⚡ SPEED 300 — INTERRUPTOR (PRENDER / APAGAR)
+-- ⚡ SPEED 300 — INTERRUPTOR
 MainTab:CreateToggle({
     Name = "⚡ SPEED 300",
     CurrentValue = false,
     Flag = "Speed300Toggle",
     Callback = function(Value)
         Speed300Active = Value
-        local Players = game:GetService("Players")
-        local player = Players.LocalPlayer
+        local player = game:GetService("Players").LocalPlayer
         local char = player.Character
         if char and char:FindFirstChildOfClass("Humanoid") then
             local hum = char:FindFirstChildOfClass("Humanoid")
             if Value then
                 OriginalSpeed = hum.WalkSpeed
                 hum.WalkSpeed = 300
-                Rayfield:Notify({
-                    Title = "✅ SPEED 300 ACTIVADO",
-                    Content = "¡Velocidad aumentada a 300!",
-                    Duration = 3
-                })
+                Rayfield:Notify({Title = "✅ Activado", Content = "Velocidad 300", Duration = 3})
             else
                 hum.WalkSpeed = OriginalSpeed
-                Rayfield:Notify({
-                    Title = "🔄 Velocidad Restaurada",
-                    Content = "Velocidad normal recuperada",
-                    Duration = 3
-                })
+                Rayfield:Notify({Title = "🔄 Restaurado", Content = "Velocidad normal", Duration = 2})
             end
-        else
-            Rayfield:Notify({
-                Title = "❌ Error",
-                Content = "Personaje no cargado",
-                Duration = 3
-            })
         end
     end,
 })
 
--- AUTO WEIGHT
+-- 🏋️ AUTO WEIGHT
 MainTab:CreateToggle({
     Name = "🏋️ AUTO WEIGHT",
     CurrentValue = false,
@@ -130,10 +115,7 @@ MainTab:CreateToggle({
                 local char = player.Character
                 if char and char:FindFirstChildOfClass("Humanoid") then
                     local tool = player.Backpack:FindFirstChild("Weight") or char:FindFirstChild("Weight")
-                    if tool and tool.Parent ~= char then 
-                        char.Humanoid:EquipTool(tool) 
-                        task.wait(0.1)
-                    end
+                    if tool and tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
                     if tool then tool:Activate() end
                     local event = player:FindFirstChild("muscleEvent")
                     if event then event:FireServer("rep") end
@@ -143,7 +125,7 @@ MainTab:CreateToggle({
     end,
 })
 
--- AUTO PUSHUP
+-- 🤸 AUTO PUSHUP
 MainTab:CreateToggle({
     Name = "🤸 Auto Pushup",
     CurrentValue = false,
@@ -156,8 +138,7 @@ MainTab:CreateToggle({
                 task.wait(0.3)
                 local char = player.Character
                 if char and char:FindFirstChildOfClass("Humanoid") then
-                    local tool = player.Backpack:FindFirstChild("Pushup") or player.Backpack:FindFirstChild("Pushups") 
-                        or char:FindFirstChild("Pushup") or char:FindFirstChild("Pushups")
+                    local tool = player.Backpack:FindFirstChild("Pushup") or player.Backpack:FindFirstChild("Pushups") or char:FindFirstChild("Pushup") or char:FindFirstChild("Pushups")
                     if tool and tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
                     if tool then tool:Activate() end
                     local event = player:FindFirstChild("muscleEvent")
@@ -168,7 +149,7 @@ MainTab:CreateToggle({
     end,
 })
 
--- AUTO ABDOMINALES
+-- 🧘 AUTO ABDOMINALES
 MainTab:CreateToggle({
     Name = "🧘 Auto Abdominales",
     CurrentValue = false,
@@ -181,8 +162,7 @@ MainTab:CreateToggle({
                 task.wait(0.3)
                 local char = player.Character
                 if char and char:FindFirstChildOfClass("Humanoid") then
-                    local tool = player.Backpack:FindFirstChild("Situps") or player.Backpack:FindFirstChild("Situp") 
-                        or char:FindFirstChild("Situps") or char:FindFirstChild("Situp")
+                    local tool = player.Backpack:FindFirstChild("Situps") or player.Backpack:FindFirstChild("Situp") or char:FindFirstChild("Situps") or char:FindFirstChild("Situp")
                     if tool and tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
                     if tool then tool:Activate() end
                     local event = player:FindFirstChild("muscleEvent")
@@ -193,7 +173,7 @@ MainTab:CreateToggle({
     end,
 })
 
--- AUTO PARADA DE MANOS
+-- 🤸‍♂️ AUTO PARADA DE MANOS
 MainTab:CreateToggle({
     Name = "🤸‍♂️ Auto Parada De Manos",
     CurrentValue = false,
@@ -206,8 +186,7 @@ MainTab:CreateToggle({
                 task.wait(0.3)
                 local char = player.Character
                 if char and char:FindFirstChildOfClass("Humanoid") then
-                    local tool = player.Backpack:FindFirstChild("Handstand") or player.Backpack:FindFirstChild("Handstands") 
-                        or char:FindFirstChild("Handstand") or char:FindFirstChild("Handstands")
+                    local tool = player.Backpack:FindFirstChild("Handstand") or player.Backpack:FindFirstChild("Handstands") or char:FindFirstChild("Handstand") or char:FindFirstChild("Handstands")
                     if tool and tool.Parent ~= char then char.Humanoid:EquipTool(tool) end
                     if tool then tool:Activate() end
                     local event = player:FindFirstChild("muscleEvent")
@@ -218,7 +197,7 @@ MainTab:CreateToggle({
     end,
 })
 
--- AUTO REBIRTH
+-- 🔄 AUTO REBIRTH
 MainTab:CreateToggle({
     Name = "🔄 AUTO REBIRTH",
     CurrentValue = false,
@@ -245,7 +224,7 @@ MainTab:CreateToggle({
     end,
 }) 
 
--- AUTO RENACIMIENTO MÁXIMO
+-- ⚡ AUTO RENACIMIENTO MÁXIMO — CORREGIDO CON CÓDIGO DE COBALT
 MainTab:CreateToggle({
     Name = "⚡ AUTO RENACIMIENTO MÁXIMO",
     CurrentValue = false,
@@ -262,34 +241,32 @@ MainTab:CreateToggle({
             until rebirthEvent or not AutoRebirthMax
             
             if not rebirthEvent then
-                Rayfield:Notify({Title = "❌ Error", Content = "No se encontró el evento de renacimiento", Duration = 5})
+                Rayfield:Notify({Title = "❌ Error", Content = "No se encontró rebirthRemote", Duration = 5})
                 return
             end
 
-            Rayfield:Notify({Title = "✅ Activado", Content = "Renacimiento máximo automático...", Duration = 3})
+            Rayfield:Notify({Title = "✅ Activado", Content = "Renacimiento máximo activado", Duration = 3})
 
             while AutoRebirthMax do
                 task.wait(0.8)
                 pcall(function()
-                    if rebirthEvent:IsA("RemoteFunction") then
-                        rebirthEvent:InvokeServer("rebirthRequest", 142086)
-                    else
-                        rebirthEvent:FireServer("rebirthRequest", 142086)
-                    end
+                    -- Código exacto de Cobalt: usa 3631812 como valor de renacimiento máximo
+                    rebirthEvent:InvokeServer("rebirthRequest", 3631812)
                 end)
             end
+
+            Rayfield:Notify({Title = "⏸️ Desactivado", Content = "Renacimiento máximo detenido", Duration = 2})
         end)
     end,
 })
 
 -- ==============================================
--- PESTAÑA PETS — AUTO CRYSTAL DESDE CUALQUIER LUGAR 💎
+-- PESTAÑA PETS
 -- ==============================================
 local PetsTab = Window:CreateTab("🐾 Pets", nil)
 PetsTab:CreateSection("EGG FARM")
 
 local AutoCrystal25Qi = false
-
 PetsTab:CreateToggle({
     Name = "💎 Auto Crystal 25Qi",
     CurrentValue = false,
@@ -299,34 +276,26 @@ PetsTab:CreateToggle({
         task.spawn(function()
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local openCrystalRemote
-            
             repeat
                 local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
                 openCrystalRemote = rEvents and rEvents:FindFirstChild("openCrystalRemote")
                 task.wait(0.1)
             until openCrystalRemote or not AutoCrystal25Qi
-            
             if not openCrystalRemote then
                 Rayfield:Notify({Title = "❌ Error", Content = "No se encontró el evento del cristal", Duration = 5})
                 return
             end
-
-            Rayfield:Notify({Title = "✅ Auto Crystal 25Qi", Content = "Activado — Abriendo Weakness Crystal desde CUALQUIER lugar", Duration = 3})
-
+            Rayfield:Notify({Title = "✅ Auto Crystal", Content = "Abriendo Weakness Crystal", Duration = 3})
             while AutoCrystal25Qi do
                 task.wait(0.5)
-                pcall(function()
-                    openCrystalRemote:InvokeServer("openCrystal", "Weakness Crystal")
-                end)
+                pcall(function() openCrystalRemote:InvokeServer("openCrystal", "Weakness Crystal") end)
             end
-
-            Rayfield:Notify({Title = "⏸️ Auto Crystal 25Qi", Content = "Desactivado", Duration = 2})
         end)
     end,
 })
 
 -- ==============================================
--- PESTAÑA MISC — ANTI LAG + ANTI AFK + LOCK POSITION
+-- PESTAÑA MISC
 -- ==============================================
 local MiscTab = Window:CreateTab("⚙️ Misc", nil)
 MiscTab:CreateSection("🚀 Rendimiento y Utilidades")
@@ -344,23 +313,19 @@ MiscTab:CreateToggle({
             local LocalPlayer = Players.LocalPlayer
             local Lighting = game:GetService("Lighting")
             local Workspace = game:GetService("Workspace")
-            
             if AntiLag then
                 Rayfield:Notify({Title = "✅ Anti Lag", Content = "Optimización activada", Duration = 3})
                 pcall(function() Lighting.Technology = Enum.Technology.Compatibility end)
                 pcall(function() Lighting.ShadowSoftness = 0 end)
                 pcall(function() Lighting.GlobalShadows = false end)
                 pcall(function() Lighting.Ambient = Color3.fromRGB(128,128,128) end)
-                
                 while AntiLag do
                     task.wait(2)
                     pcall(function()
                         for _, desc in ipairs(Workspace:GetDescendants()) do
                             if not AntiLag then break end
                             if desc:IsA("ParticleEmitter") or desc:IsA("Trail") or desc:IsA("Fire") or desc:IsA("Smoke") then
-                                if not desc.Parent:IsDescendantOf(LocalPlayer.Character) then
-                                    desc.Enabled = false
-                                end
+                                if not desc.Parent:IsDescendantOf(LocalPlayer.Character) then desc.Enabled = false end
                             end
                         end
                     end)
@@ -374,10 +339,9 @@ MiscTab:CreateToggle({
     end,
 })
 
--- 🛡️ ANTI AFK — SEGURO
+-- 🛡️ ANTI AFK
 local AntiAfk = false
 local AntiAfkConnection
-
 MiscTab:CreateToggle({
     Name = "🛡️ Anti AFK (Seguro)",
     CurrentValue = false,
@@ -387,7 +351,6 @@ MiscTab:CreateToggle({
         if AntiAfk then
             local VirtualUser = game:GetService("VirtualUser")
             local Players = game:GetService("Players")
-            
             AntiAfkConnection = Players.LocalPlayer.Idled:Connect(function()
                 VirtualUser:CaptureController()
                 VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame.Position)
@@ -395,13 +358,9 @@ MiscTab:CreateToggle({
                 VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame.Position)
                 VirtualUser:ReleaseController()
             end)
-            
-            Rayfield:Notify({Title = "✅ Anti AFK", Content = "Activado — No te expulsará", Duration = 3})
+            Rayfield:Notify({Title = "✅ Anti AFK", Content = "Activado", Duration = 3})
         else
-            if AntiAfkConnection then
-                AntiAfkConnection:Disconnect()
-                AntiAfkConnection = nil
-            end
+            if AntiAfkConnection then AntiAfkConnection:Disconnect() AntiAfkConnection = nil end
             Rayfield:Notify({Title = "🛡️ Anti AFK", Content = "Desactivado", Duration = 2})
         end
     end,
@@ -411,7 +370,6 @@ MiscTab:CreateToggle({
 local LockPosition = false
 local OriginalPosition = nil
 local LockPositionConnection = nil
-
 MiscTab:CreateToggle({
     Name = "🎯 Lock Position",
     CurrentValue = false,
@@ -421,18 +379,16 @@ MiscTab:CreateToggle({
         local Players = game:GetService("Players")
         local RunService = game:GetService("RunService")
         local player = Players.LocalPlayer
-
         if LockPosition then
             local char = player.Character
             if char and char:FindFirstChild("HumanoidRootPart") then
                 OriginalPosition = char.HumanoidRootPart.Position
-                Rayfield:Notify({Title = "✅ Lock Position", Content = "Posición bloqueada", Duration = 2})
+                Rayfield:Notify({Title = "✅ Bloqueado", Content = "Posición fija", Duration = 2})
             else
                 LockPosition = false
-                Rayfield:Notify({Title = "❌ Error", Content = "No se pudo obtener la posición", Duration = 3})
+                Rayfield:Notify({Title = "❌ Error", Content = "No se pudo obtener posición", Duration = 3})
                 return
             end
-
             LockPositionConnection = RunService.Heartbeat:Connect(function()
                 local char = player.Character
                 if char and char:FindFirstChild("HumanoidRootPart") and OriginalPosition then
@@ -440,12 +396,9 @@ MiscTab:CreateToggle({
                 end
             end)
         else
-            if LockPositionConnection then
-                LockPositionConnection:Disconnect()
-                LockPositionConnection = nil
-            end
+            if LockPositionConnection then LockPositionConnection:Disconnect() LockPositionConnection = nil end
             OriginalPosition = nil
-            Rayfield:Notify({Title = "🔓 Lock Position", Content = "Posición desbloqueada", Duration = 2})
+            Rayfield:Notify({Title = "🔓 Desbloqueado", Content = "Posición libre", Duration = 2})
         end
     end,
 })
