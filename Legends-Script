@@ -15,16 +15,8 @@ local Window = Rayfield:CreateWindow({
       Invite = "ayt6qxRca",
       RememberJoins = true
    },
-   KeySystem = true,
-   KeySettings = {
-      Title = "Untitled",
-      Subtitle = "LEGENDS SCRIPT",
-      Note = "SCRIPT PRIVADO",
-      FileName = "Key",
-      SaveKey = true,
-      GrabKeyFromSite = true,
-      Key = {"XXXX"}
-   }
+   KeySystem = false, -- ❌ SISTEMA DE LLAVES DESACTIVADO
+   -- Ya no necesitas KeySettings
 })
 
 -- ==============================================
@@ -222,9 +214,9 @@ MainTab:CreateToggle({
             end
         end)
     end,
-}) 
+})
 
--- ⚡ AUTO RENACIMIENTO MÁXIMO — CORREGIDO CON CÓDIGO DE COBALT
+-- ⚡ AUTO RENACIMIENTO MÁXIMO
 MainTab:CreateToggle({
     Name = "⚡ AUTO RENACIMIENTO MÁXIMO",
     CurrentValue = false,
@@ -250,7 +242,6 @@ MainTab:CreateToggle({
             while AutoRebirthMax do
                 task.wait(0.8)
                 pcall(function()
-                    -- Código exacto de Cobalt: usa 3631812 como valor de renacimiento máximo
                     rebirthEvent:InvokeServer("rebirthRequest", 3631812)
                 end)
             end
