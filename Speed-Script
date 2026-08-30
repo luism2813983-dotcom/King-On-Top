@@ -208,9 +208,6 @@ MainTab:CreateToggle({
 local PetsTab = Window:CreateTab("🐾 Pets", nil)
 PetsTab:CreateSection("EGG FARM")
 
-    end,
-})
-
 -- Pestaña Misc
 local MiscTab = Window:CreateTab("⚙️ Misc", nil)
 MiscTab:CreateSection("Utilidades")
